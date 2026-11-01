@@ -1,4 +1,6 @@
-﻿export class Contacto {
+﻿const FORMATO_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export class Contacto {
   public readonly nombreCompleto: string;
   public readonly email: string;
 
@@ -11,6 +13,9 @@
     }
     if (mail === "") {
       throw new Error("La dirección de correo es obligatoria");
+    }
+    if (!FORMATO_EMAIL.test(mail)) {
+      throw new Error("La dirección de correo tiene un formato inválido");
     }
 
     this.nombreCompleto = nombre;

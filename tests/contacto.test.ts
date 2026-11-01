@@ -16,4 +16,18 @@ describe("Contacto", () => {
     expect(() => new Contacto("Ana", "")).toThrow("correo");
     expect(() => new Contacto("Ana", "   ")).toThrow("correo");
   });
+
+  it.each(["sin-arroba", "a@", "@dominio.com", "a@dominio", "a b@dominio.com", "a@@dominio.com"])(
+    "rechaza el formato de email inválido: %s",
+    (mail) => {
+      expect(() => new Contacto("Ana", mail)).toThrow("formato");
+    }
+  );
+
+  it.each(["ana@ucp.edu.ar", "a.b-c_d+tag@sub.dominio.com", "x@y.io"])(
+    "acepta el formato de email válido: %s",
+    (mail) => {
+      expect(() => new Contacto("Ana", mail)).not.toThrow();
+    }
+  );
 });
