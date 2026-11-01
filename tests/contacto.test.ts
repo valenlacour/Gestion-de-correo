@@ -11,4 +11,9 @@ describe("Contacto", () => {
     expect(() => new Contacto("", "ana@ucp.edu.ar")).toThrow("nombre");
     expect(() => new Contacto("   ", "ana@ucp.edu.ar")).toThrow("nombre");
   });
+
+  it("rechaza un email vacío", () => {
+    expect(() => new Contacto("Ana", "")).toThrow("correo");
+    expect(() => new Contacto("Ana", "   ")).toThrow("correo");
+  });
 });
