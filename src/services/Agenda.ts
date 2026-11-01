@@ -23,4 +23,30 @@ export class Agenda {
   listar(): ReadonlyArray<Contacto> {
     return [...this.contactos.values()];
   }
+
+  modificar(email: string, cambios: { nombreCompleto?: string; email?: string }): Contacto {
+    const actual = this.obtener(email);
+    if (!actual) {
+      throw new Error("No existe un contacto con esa dirección de correo");
+    }
+
+    // Se crea un contacto nuevo: Contacto es inmutable y vuelve a validar los datos.
+    const nuevo = new Contacto(
+      cambios.nombreCompleto ?? actual.nombreCompleto,
+      cambios.email ?? actual.email
+    );
+
+    if (nuevo.email !== actual.email && this.contactos.has(nuevo.email)) {
+      throw new Error("Ya existe un contacto con esa dirección de correo");
+    }
+
+    this.contactos.delete(actual.email);
+    this.contactos.set(nuevo.email, nuevo);
+    return nuevo;
+  }
+
+  /** Quita el contacto de la agenda. No toca ningún correo. */
+  eliminar(email: string): boolean {
+    return this.contactos.delete(email.trim().toLowerCase());
+  }
 }
