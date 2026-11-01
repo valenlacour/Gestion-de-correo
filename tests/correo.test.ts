@@ -81,3 +81,50 @@ describe("RF-01 · Encapsulamiento de destinatarios", () => {
     ).toThrow("destinatario");
   });
 });
+
+describe("RF-08 · Estado de lectura", () => {
+  const nuevoCorreo = () => new Correo({ asunto: "Hola", cuerpo: "Texto", remitente: ana, destinatarios: [luis] });
+
+  it("se puede marcar como leído", () => {
+    const c = nuevoCorreo();
+    c.marcarComoLeido();
+    expect(c.leido).toBe(true);
+  });
+
+  it("se puede volver a marcar como no leído", () => {
+    const c = nuevoCorreo();
+    c.marcarComoLeido();
+    c.marcarComoNoLeido();
+    expect(c.leido).toBe(false);
+  });
+
+  it("el estado se mantiene al consultarlo varias veces", () => {
+    const c = nuevoCorreo();
+    c.marcarComoLeido();
+    expect(c.leido).toBe(true);
+    expect(c.leido).toBe(true);
+  });
+
+  it("marcar como leído dos veces no cambia el estado", () => {
+    const c = nuevoCorreo();
+    c.marcarComoLeido();
+    c.marcarComoLeido();
+    expect(c.leido).toBe(true);
+  });
+
+  it("el estado de un correo no afecta a otro", () => {
+    const a = nuevoCorreo();
+    const b = nuevoCorreo();
+    a.marcarComoLeido();
+    expect(b.leido).toBe(false);
+  });
+
+  it("cambiar el estado de lectura no altera el resto de la información", () => {
+    const c = nuevoCorreo();
+    const id = c.id;
+    c.marcarComoLeido();
+    expect(c.id).toBe(id);
+    expect(c.asunto).toBe("Hola");
+    expect(c.remitente).toBe(ana);
+  });
+});

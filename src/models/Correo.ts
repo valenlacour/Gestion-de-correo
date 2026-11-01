@@ -49,4 +49,12 @@ export class Correo {
   get favorito(): boolean {
     return this._favorito;
   }
+
+  marcarComoLeido(): void {
+    this._leido = true;
+  }
+
+  marcarComoNoLeido(): void {
+    this._leido = false;
+  }
 }
