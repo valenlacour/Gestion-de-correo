@@ -6,7 +6,7 @@ export class Contacto {
 
   constructor(nombreCompleto: string, email: string) {
     const nombre = nombreCompleto.trim();
-    const mail = email.trim();
+    const mail = email.trim().toLowerCase();
 
     if (nombre === "") {
       throw new Error("El nombre completo es obligatorio");
@@ -20,5 +20,10 @@ export class Contacto {
 
     this.nombreCompleto = nombre;
     this.email = mail;
+  }
+
+  /** Dos contactos son el mismo si comparten dirección de correo. */
+  esIgualA(otro: Contacto): boolean {
+    return this.email === otro.email;
   }
 }

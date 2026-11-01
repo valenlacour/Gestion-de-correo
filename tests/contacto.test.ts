@@ -31,3 +31,17 @@ describe("Contacto", () => {
     }
   );
 });
+
+describe("Contacto · normalización e igualdad", () => {
+  it("guarda el email en minúsculas y sin espacios en los bordes", () => {
+    const c = new Contacto("Ana", "  ANA@UCP.edu.ar ");
+    expect(c.email).toBe("ana@ucp.edu.ar");
+  });
+
+  it("dos contactos con el mismo email son iguales, aunque cambie el nombre o las mayúsculas", () => {
+    const a = new Contacto("Ana", "ana@ucp.edu.ar");
+    const b = new Contacto("Ana P.", "ANA@ucp.edu.ar");
+    expect(a.esIgualA(b)).toBe(true);
+    expect(a.esIgualA(new Contacto("Luis", "luis@ucp.edu.ar"))).toBe(false);
+  });
+});
