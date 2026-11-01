@@ -13,7 +13,7 @@ export class Correo {
   public readonly asunto: string;
   public readonly cuerpo: string;
   public readonly remitente: Contacto;
-  public readonly destinatarios: Contacto[];
+  private readonly _destinatarios: Contacto[];
   private _leido = false;
   private _favorito = false;
 
@@ -22,11 +22,24 @@ export class Correo {
       throw new Error("El remitente es obligatorio y debe ser un contacto");
     }
 
+    const destinatarios = datos.destinatarios ?? [];
+    if (!destinatarios.every((d) => d instanceof Contacto)) {
+      throw new Error("Todos los destinatarios deben ser contactos");
+    }
+
     this.id = randomUUID();
     this.asunto = datos.asunto ?? "";
     this.cuerpo = datos.cuerpo ?? "";
     this.remitente = datos.remitente;
-    this.destinatarios = datos.destinatarios ?? [];
+    // Copia propia (no se comparte el array de afuera) y sin repetir direcciones.
+    this._destinatarios = destinatarios.filter(
+      (d, i) => destinatarios.findIndex((x) => x.esIgualA(d)) === i
+    );
+  }
+
+  /** Colección de solo lectura: no expone la lista interna. */
+  get destinatarios(): ReadonlyArray<Contacto> {
+    return Object.freeze([...this._destinatarios]);
   }
 
   get leido(): boolean {

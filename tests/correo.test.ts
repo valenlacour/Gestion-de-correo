@@ -42,3 +42,42 @@ describe("RF-01 · Creación de correos", () => {
     expect(() => new Correo({ asunto: "Hola", remitente: undefined as unknown as Contacto })).toThrow("remitente");
   });
 });
+
+describe("RF-01 · Encapsulamiento de destinatarios", () => {
+  it("el array recibido en el constructor no queda compartido con el correo", () => {
+    const origen = [luis];
+    const c = new Correo({ remitente: ana, destinatarios: origen });
+    origen.push(sofi);
+    expect(c.destinatarios).toEqual([luis]);
+  });
+
+  it("modificar la colección que devuelve el correo no altera el correo", () => {
+    const c = new Correo({ remitente: ana, destinatarios: [luis] });
+    const lista = c.destinatarios as Contacto[];
+    try {
+      lista.push(sofi);
+    } catch {
+      // si la colección está congelada, lanza un error: también es válido
+    }
+    expect(c.destinatarios).toEqual([luis]);
+  });
+
+  it("la colección expuesta está congelada", () => {
+    const c = new Correo({ remitente: ana, destinatarios: [luis] });
+    expect(Object.isFrozen(c.destinatarios)).toBe(true);
+  });
+
+  it("no repite destinatarios con la misma dirección", () => {
+    const c = new Correo({
+      remitente: ana,
+      destinatarios: [luis, new Contacto("Luis G.", "LUIS@gmail.com"), sofi],
+    });
+    expect(c.destinatarios).toHaveLength(2);
+  });
+
+  it("valida que los destinatarios sean contactos", () => {
+    expect(
+      () => new Correo({ remitente: ana, destinatarios: [{ nombre: "x" } as unknown as Contacto] })
+    ).toThrow("destinatario");
+  });
+});
