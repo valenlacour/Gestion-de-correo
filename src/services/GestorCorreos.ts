@@ -4,6 +4,7 @@ import { Correo } from "../models/Correo";
 interface Registro {
   correo: Correo;
   bandeja: Bandeja;
+  origen?: Bandeja; // bandeja de la que vino, para poder restaurarlo
 }
 
 /**
@@ -28,5 +29,47 @@ export class GestorCorreos {
 
   bandejaDe(correo: Correo): Bandeja | undefined {
     return this.registros.get(correo.id)?.bandeja;
+  }
+
+  /** Eliminación lógica: pasa el correo a Eliminados recordando su origen. */
+  eliminar(correo: Correo): void {
+    const registro = this.obtenerRegistro(correo);
+    if (registro.bandeja === Bandeja.Eliminados) {
+      throw new Error("El correo ya está en Eliminados");
+    }
+    registro.origen = registro.bandeja;
+    registro.bandeja = Bandeja.Eliminados;
+  }
+
+  /** Devuelve un correo eliminado a su bandeja de origen. */
+  restaurar(correo: Correo): void {
+    const registro = this.obtenerRegistro(correo);
+    if (registro.bandeja !== Bandeja.Eliminados) {
+      throw new Error("El correo no está en Eliminados");
+    }
+    registro.bandeja = registro.origen ?? Bandeja.Entrada;
+    registro.origen = undefined;
+  }
+
+  /** Movimientos permitidos: a Eliminados desde cualquier bandeja, y de Eliminados a su origen. */
+  mover(correo: Correo, destino: Bandeja): void {
+    if (destino === Bandeja.Eliminados) {
+      this.eliminar(correo);
+      return;
+    }
+    const registro = this.obtenerRegistro(correo);
+    if (registro.bandeja === Bandeja.Eliminados && registro.origen === destino) {
+      this.restaurar(correo);
+      return;
+    }
+    throw new Error(`Movimiento no permitido: de ${registro.bandeja} a ${destino}`);
+  }
+
+  private obtenerRegistro(correo: Correo): Registro {
+    const registro = this.registros.get(correo.id);
+    if (!registro) {
+      throw new Error("El correo no está registrado en el gestor");
+    }
+    return registro;
   }
 }

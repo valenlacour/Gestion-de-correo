@@ -53,3 +53,80 @@ describe("RF-06 · Bandejas", () => {
     expect(gestor.bandejaDe(nuevoCorreo())).toBeUndefined();
   });
 });
+
+describe("RF-06 · Mover, eliminar y restaurar", () => {
+  let gestor: GestorCorreos;
+
+  beforeEach(() => {
+    gestor = new GestorCorreos();
+  });
+
+  const total = () => Object.values(Bandeja).reduce((n, b) => n + gestor.correosDe(b).length, 0);
+
+  it("eliminar traslada el correo de su bandeja a Eliminados", () => {
+    const c = nuevoCorreo();
+    gestor.recibir(c);
+    gestor.eliminar(c);
+    expect(gestor.correosDe(Bandeja.Entrada)).toEqual([]);
+    expect(gestor.correosDe(Bandeja.Eliminados)).toEqual([c]);
+    expect(gestor.bandejaDe(c)).toBe(Bandeja.Eliminados);
+  });
+
+  it("eliminar no genera duplicados", () => {
+    const c = nuevoCorreo();
+    gestor.recibir(c);
+    gestor.eliminar(c);
+    expect(total()).toBe(1);
+  });
+
+  it("restaurar devuelve el correo a su bandeja de origen", () => {
+    const c = nuevoCorreo();
+    gestor.recibir(c);
+    gestor.eliminar(c);
+    gestor.restaurar(c);
+    expect(gestor.bandejaDe(c)).toBe(Bandeja.Entrada);
+    expect(gestor.correosDe(Bandeja.Eliminados)).toEqual([]);
+    expect(total()).toBe(1);
+  });
+
+  it("eliminar y restaurar conservan el estado de lectura y favorito", () => {
+    const c = nuevoCorreo();
+    c.marcarComoLeido();
+    gestor.recibir(c);
+    gestor.eliminar(c);
+    gestor.restaurar(c);
+    expect(c.leido).toBe(true);
+  });
+
+  it("no se puede eliminar un correo que ya está en Eliminados", () => {
+    const c = nuevoCorreo();
+    gestor.recibir(c);
+    gestor.eliminar(c);
+    expect(() => gestor.eliminar(c)).toThrow("ya está en Eliminados");
+  });
+
+  it("no se puede restaurar un correo que no está en Eliminados", () => {
+    const c = nuevoCorreo();
+    gestor.recibir(c);
+    expect(() => gestor.restaurar(c)).toThrow("no está en Eliminados");
+  });
+
+  it("rechaza movimientos no permitidos, como pasar un correo recibido a Enviados", () => {
+    const c = nuevoCorreo();
+    gestor.recibir(c);
+    expect(() => gestor.mover(c, Bandeja.Enviados)).toThrow("Movimiento no permitido");
+    expect(gestor.bandejaDe(c)).toBe(Bandeja.Entrada);
+  });
+
+  it("mover a Eliminados equivale a eliminar", () => {
+    const c = nuevoCorreo();
+    gestor.recibir(c);
+    gestor.mover(c, Bandeja.Eliminados);
+    expect(gestor.bandejaDe(c)).toBe(Bandeja.Eliminados);
+  });
+
+  it("falla si el correo no está registrado en el gestor", () => {
+    expect(() => gestor.eliminar(nuevoCorreo())).toThrow("no está registrado");
+    expect(() => gestor.restaurar(nuevoCorreo())).toThrow("no está registrado");
+  });
+});
