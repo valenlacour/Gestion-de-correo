@@ -6,6 +6,8 @@ export interface DatosCorreo {
   cuerpo?: string;
   remitente: Contacto;
   destinatarios?: Contacto[];
+  /** Uso interno: conserva la identidad al editar un borrador. */
+  id?: string;
 }
 
 export class Correo {
@@ -27,7 +29,7 @@ export class Correo {
       throw new Error("Todos los destinatarios deben ser contactos");
     }
 
-    this.id = randomUUID();
+    this.id = datos.id ?? randomUUID();
     this.asunto = datos.asunto ?? "";
     this.cuerpo = datos.cuerpo ?? "";
     this.remitente = datos.remitente;
@@ -50,6 +52,19 @@ export class Correo {
     return this._favorito;
   }
 
+  /** Devuelve una versión nueva con los cambios aplicados, conservando id, remitente y estado. */
+  conCambios(cambios: { asunto?: string; cuerpo?: string; destinatarios?: Contacto[] }): Correo {
+    const copia = new Correo({
+      id: this.id,
+      asunto: cambios.asunto ?? this.asunto,
+      cuerpo: cambios.cuerpo ?? this.cuerpo,
+      remitente: this.remitente,
+      destinatarios: cambios.destinatarios ?? [...this._destinatarios],
+    });
+    copia._leido = this._leido;
+    copia._favorito = this._favorito;
+    return copia;
+  }
   marcarComoLeido(): void {
     this._leido = true;
   }
@@ -58,3 +73,4 @@ export class Correo {
     this._leido = false;
   }
 }
+

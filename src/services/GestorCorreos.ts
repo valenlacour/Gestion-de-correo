@@ -28,6 +28,30 @@ export class GestorCorreos {
     return borrador;
   }
 
+  /** RF-07: edita un borrador. Devuelve la versión nueva, con el mismo id. */
+  editarBorrador(
+    borrador: Correo,
+    cambios: { asunto?: string; cuerpo?: string; destinatarios?: ReadonlyArray<Correo["remitente"]> }
+  ): Correo {
+    const registro = this.obtenerRegistro(borrador);
+    if (registro.bandeja !== Bandeja.Borradores) {
+      throw new Error("El correo no es un borrador");
+    }
+    // Si los cambios son inválidos, conCambios lanza error antes de reemplazar nada.
+    const editado = registro.correo.conCambios({
+      ...cambios,
+      destinatarios: cambios.destinatarios ? [...cambios.destinatarios] : undefined,
+    });
+    registro.correo = editado;
+    return editado;
+  }
+
+  /** RF-07: recupera un borrador por su id (con sus últimos cambios). */
+  obtenerBorrador(id: string): Correo | undefined {
+    const registro = this.registros.get(id);
+    return registro?.bandeja === Bandeja.Borradores ? registro.correo : undefined;
+  }
+
   correosDe(bandeja: Bandeja): ReadonlyArray<Correo> {
     return [...this.registros.values()]
       .filter((r) => r.bandeja === bandeja)
