@@ -1,5 +1,5 @@
 ﻿import { Bandeja } from "../models/Bandeja";
-import { Correo } from "../models/Correo";
+import { Correo, DatosCorreo } from "../models/Correo";
 
 interface Registro {
   correo: Correo;
@@ -19,6 +19,13 @@ export class GestorCorreos {
       throw new Error("El correo ya está registrado en el gestor");
     }
     this.registros.set(correo.id, { correo, bandeja: Bandeja.Entrada });
+  }
+
+  /** RF-07: registra un borrador. Puede estar incompleto; solo exige el remitente. */
+  crearBorrador(datos: DatosCorreo): Correo {
+    const borrador = new Correo(datos); // valida el remitente
+    this.registros.set(borrador.id, { correo: borrador, bandeja: Bandeja.Borradores });
+    return borrador;
   }
 
   correosDe(bandeja: Bandeja): ReadonlyArray<Correo> {
