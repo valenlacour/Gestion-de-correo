@@ -1,4 +1,5 @@
 ﻿import { Bandeja } from "../models/Bandeja";
+import { favoritos as soloFavoritos } from "./consultas";
 import { Correo, DatosCorreo } from "../models/Correo";
 
 interface Registro {
@@ -80,6 +81,13 @@ export class GestorCorreos {
     return aEnviar;
   }
 
+  /** RF-09: favoritos de todas las bandejas. Los eliminados no aparecen hasta restaurarlos. */
+  favoritos(): ReadonlyArray<Correo> {
+    const visibles = [...this.registros.values()]
+      .filter((r) => r.bandeja !== Bandeja.Eliminados)
+      .map((r) => r.correo);
+    return soloFavoritos(visibles);
+  }
   correosDe(bandeja: Bandeja): ReadonlyArray<Correo> {
     return [...this.registros.values()]
       .filter((r) => r.bandeja === bandeja)
@@ -141,3 +149,4 @@ export class GestorCorreos {
     return registro;
   }
 }
+

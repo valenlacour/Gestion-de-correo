@@ -52,6 +52,13 @@ export class Correo {
     return this._favorito;
   }
 
+  marcarComoFavorito(): void {
+    this._favorito = true;
+  }
+
+  quitarFavorito(): void {
+    this._favorito = false;
+  }
   /** Devuelve una versión nueva con los cambios aplicados, conservando id, remitente y estado. */
   conCambios(cambios: { asunto?: string; cuerpo?: string; destinatarios?: Contacto[] }): Correo {
     const copia = new Correo({
@@ -73,4 +80,5 @@ export class Correo {
     this._leido = false;
   }
 }
+
 
