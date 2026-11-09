@@ -52,6 +52,34 @@ export class GestorCorreos {
     return registro?.bandeja === Bandeja.Borradores ? registro.correo : undefined;
   }
 
+  /**
+   * RF-02: envía un correo (simulado). Exige asunto válido y al menos un destinatario.
+   * Si venía de Borradores, deja de estar ahí; el correo queda UNA sola vez, en Enviados.
+   */
+  enviar(correo: Correo): Correo {
+    const registro = this.registros.get(correo.id);
+
+    if (registro) {
+      if (registro.bandeja === Bandeja.Enviados) {
+        throw new Error("El correo ya fue enviado");
+      }
+      if (registro.bandeja !== Bandeja.Borradores) {
+        throw new Error(`No se puede enviar un correo que está en ${registro.bandeja}`);
+      }
+    }
+
+    // Se usa la última versión del borrador, si existe.
+    const aEnviar = registro ? registro.correo : correo;
+    this.validarEnvio(aEnviar);
+
+    if (registro) {
+      registro.bandeja = Bandeja.Enviados;
+    } else {
+      this.registros.set(aEnviar.id, { correo: aEnviar, bandeja: Bandeja.Enviados });
+    }
+    return aEnviar;
+  }
+
   correosDe(bandeja: Bandeja): ReadonlyArray<Correo> {
     return [...this.registros.values()]
       .filter((r) => r.bandeja === bandeja)
@@ -94,6 +122,15 @@ export class GestorCorreos {
       return;
     }
     throw new Error(`Movimiento no permitido: de ${registro.bandeja} a ${destino}`);
+  }
+
+  private validarEnvio(correo: Correo): void {
+    if (correo.asunto.trim() === "") {
+      throw new Error("El asunto es obligatorio para enviar un correo");
+    }
+    if (correo.destinatarios.length === 0) {
+      throw new Error("Debe haber al menos un destinatario para enviar un correo");
+    }
   }
 
   private obtenerRegistro(correo: Correo): Registro {
