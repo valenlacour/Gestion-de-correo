@@ -1,5 +1,5 @@
 ﻿import { Bandeja } from "../models/Bandeja";
-import { favoritos as soloFavoritos } from "./consultas";
+import { favoritos as soloFavoritos, buscar as buscarEn } from "./consultas";
 import { Correo, DatosCorreo } from "../models/Correo";
 
 interface Registro {
@@ -88,6 +88,10 @@ export class GestorCorreos {
       .map((r) => r.correo);
     return soloFavoritos(visibles);
   }
+  /** RF-04: busca texto libre en la Bandeja de Entrada. */
+  buscar(texto: string): ReadonlyArray<Correo> {
+    return buscarEn(this.correosDe(Bandeja.Entrada), texto);
+  }
   correosDe(bandeja: Bandeja): ReadonlyArray<Correo> {
     return [...this.registros.values()]
       .filter((r) => r.bandeja === bandeja)
@@ -149,4 +153,5 @@ export class GestorCorreos {
     return registro;
   }
 }
+
 
