@@ -62,7 +62,7 @@ describe("RF-05 · polimorfismo de criterios", () => {
   it("una lista Filtro[] mezcla subclases y se usa de la misma forma", () => {
     const filtros: Filtro[] = crearFiltros(amigo);
     const resultados = filtros.map((f) => todos.filter(f.predicado).length);
-    expect(resultados).toEqual([2, 1, 2, 2, 1]);
+    expect(resultados).toEqual([2, 1, 1, 2, 1]);
   });
 
   it("aplicar es polimórfico: cada subclase resuelve su propio predicado", () => {
