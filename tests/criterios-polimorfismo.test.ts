@@ -14,7 +14,8 @@ import {
 } from "../src/services/predicados";
 import { Correo, DatosCorreo } from "../src/models/Correo";
 import { Contacto } from "../src/models/Contacto";
-import { Bandeja, GestorCorreos } from "../src/services/GestorCorreos";
+import { GestorCorreos } from "../src/services/GestorCorreos";
+import { Bandeja } from "../src/models/Bandeja";
 
 const profe = new Contacto("Prof Gómez", "gomez@ucp.edu.ar");
 const amigo = new Contacto("Mateo", "mateo@gmail.com");
