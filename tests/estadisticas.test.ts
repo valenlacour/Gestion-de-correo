@@ -1,6 +1,7 @@
-import { asuntos, resumir } from "../src/services/estadisticas";
+import { asuntos, filtrarPor, resumir } from "../src/services/estadisticas";
 import { Correo } from "../src/models/Correo";
 import { Contacto } from "../src/models/Contacto";
+import { asuntoContiene, favorito, leido, not, remitenteDeDominio } from "../src/services/predicados";
 
 const ana = new Contacto("Ana Pérez", "ana@ucp.edu.ar");
 const luis = new Contacto("Luis Gómez", "luis@gmail.com");
@@ -53,6 +54,40 @@ describe("RF-10 · resumir", () => {
     const correos = [nuevo("A"), nuevo("B")];
     const copia = [...correos];
     resumir(correos);
+    expect(correos).toEqual(copia);
+  });
+});
+
+describe("RF-10 · filtrarPor", () => {
+  it("devuelve vacío si no hay correos", () => {
+    expect(filtrarPor([], leido)).toEqual([]);
+  });
+
+  it("devuelve solo los correos que cumplen la condición, en el mismo orden", () => {
+    const a = nuevo("A");
+    const b = nuevo("B");
+    const c = nuevo("C");
+    b.marcarComoLeido();
+    c.marcarComoLeido();
+    expect(filtrarPor([a, b, c], leido)).toEqual([b, c]);
+  });
+
+  it("devuelve vacío si ninguno cumple", () => {
+    expect(filtrarPor([nuevo("A"), nuevo("B")], favorito)).toEqual([]);
+  });
+
+  it("acepta predicados de RF-05 y sus combinaciones", () => {
+    const a = nuevo("Proyecto final");
+    const b = nuevo("Fotos");
+    const externo = new Correo({ remitente: ana, asunto: "Proyecto interno", destinatarios: [luis] });
+    expect(filtrarPor([a, b, externo], asuntoContiene("Proyecto"))).toEqual([a, externo]);
+    expect(filtrarPor([a, b, externo], not(remitenteDeDominio("@ucp.edu.ar")))).toEqual([a, b]);
+  });
+
+  it("no modifica la colección original", () => {
+    const correos = [nuevo("A"), nuevo("B")];
+    const copia = [...correos];
+    filtrarPor(correos, leido);
     expect(correos).toEqual(copia);
   });
 });

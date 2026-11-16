@@ -1,4 +1,5 @@
 import { Correo } from "../models/Correo";
+import { Predicado } from "./predicados";
 
 export interface Resumen {
   readonly total: number;
@@ -9,6 +10,9 @@ export interface Resumen {
 
 export const asuntos = (correos: ReadonlyArray<Correo>): string[] =>
   correos.map((correo) => correo.asunto);
+
+export const filtrarPor = (correos: ReadonlyArray<Correo>, condicion: Predicado): Correo[] =>
+  correos.filter(condicion);
 
 export const resumir = (correos: ReadonlyArray<Correo>): Resumen =>
   correos.reduce<Resumen>(
