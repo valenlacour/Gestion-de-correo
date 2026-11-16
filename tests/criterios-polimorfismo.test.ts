@@ -34,8 +34,14 @@ const crearFiltros = (contacto: Contacto): CriterioFiltro[] => {
     ucp,
     new CriterioY("Académicos", [ucp, examen]),
     new CriterioY("Pendientes", [sinLeer, entrega]),
-    new CriterioO("Personales", [new CriterioSimple("Del contacto", remitenteEs(contacto.email)), fav]),
-    new CriterioY("Seguimiento", [fav, sinLeer]),
+    new CriterioY("Personales", [new CriterioSimple("Del contacto", remitenteEs(contacto.email)), fav]),
+    new CriterioY("Seguimiento", [
+      new CriterioO("Proyecto o Reunión", [
+        new CriterioSimple("Asunto Proyecto", asuntoContiene("Proyecto")),
+        new CriterioSimple("Asunto Reunión", asuntoContiene("Reunión")),
+      ]),
+      sinLeer,
+    ]),
   ];
 };
 
@@ -53,7 +59,7 @@ describe("RF-05 · polimorfismo de criterios", () => {
     c2.marcarComoLeido();
     c3 = nuevo({ remitente: amigo, asunto: "Proyecto pendiente", cuerpo: "Revisar" });
     c3.marcarComoFavorito();
-    c4 = nuevo({ remitente: amigo, asunto: "Fotos", cuerpo: "Mirá" });
+    c4 = nuevo({ remitente: amigo, asunto: "Reunión de fotos", cuerpo: "Mirá" });
     c4.marcarComoLeido();
     c5 = nuevo({ remitente: yo, asunto: "Nota personal", cuerpo: "Recordar" });
     todos = [c1, c2, c3, c4, c5];
@@ -62,7 +68,7 @@ describe("RF-05 · polimorfismo de criterios", () => {
   it("una lista Filtro[] mezcla subclases y se usa de la misma forma", () => {
     const filtros: Filtro[] = crearFiltros(amigo);
     const resultados = filtros.map((f) => todos.filter(f.predicado).length);
-    expect(resultados).toEqual([2, 1, 1, 2, 1]);
+    expect(resultados).toEqual([2, 1, 1, 1, 1]);
   });
 
   it("aplicar es polimórfico: cada subclase resuelve su propio predicado", () => {
@@ -70,7 +76,7 @@ describe("RF-05 · polimorfismo de criterios", () => {
     expect(ucp.aplicar(todos)).toEqual([c1, c2]);
     expect(academicos.aplicar(todos)).toEqual([c1]);
     expect(pendientes.aplicar(todos)).toEqual([c1]);
-    expect(personales.aplicar(todos)).toEqual([c3, c4]);
+    expect(personales.aplicar(todos)).toEqual([c3]);
     expect(seguimiento.aplicar(todos)).toEqual([c3]);
   });
 
@@ -113,7 +119,6 @@ describe("RF-05 · polimorfismo de criterios", () => {
     const seguimiento = crearFiltros(amigo)[4];
     c3.marcarComoLeido();
     expect(seguimiento.aplicar(todos)).toEqual([]);
-    c4.marcarComoFavorito();
     c4.marcarComoNoLeido();
     expect(seguimiento.aplicar(todos)).toEqual([c4]);
   });
